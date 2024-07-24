@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "ImageFormats.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -19,8 +21,11 @@ public:
 
 public slots:
     void uploadImage();
+    void print_metadata();
 
 private:
     Ui::MainWindow *ui;
+    QString m_fName;
+    imageFormat m_format;
 };
 #endif // MAINWINDOW_H
