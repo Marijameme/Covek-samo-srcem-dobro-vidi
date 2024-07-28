@@ -9,14 +9,33 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# ZA QT PAKETE
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+<<<<<<< HEAD
+=======
+# ZA OPENCV BIBLIOTEKU
+find_package(OpenCV REQUIRED)
+message(STATUS "Include dirs: ${OpenCV_INCLUDE_DIRS}")
+
+# ZA EXIV2 BIBLIOTEKU
+find_package(exiv2 REQUIRED)
+message(STATUS "Include dirs: ${Exiv2_INCLUDE_DIRS}")
+
+# ZA EXIFTOOL INTERFACE
+set(EXIFTOOL_DIR "/home/marijana/Downloads/cpp_exiftool")
+include_directories(${EXIFTOOL_DIR}/inc)
+
+>>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        ${EXIFTOOL_DIR}/src/ExifTool.cpp
+        ${EXIFTOOL_DIR}/src/ExifToolPipe.cpp
+        ${EXIFTOOL_DIR}/src/TagInfo.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -25,17 +44,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         colorfilter.h colorfilter.cpp
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET Covek-samo-srcem-dobro-vidi APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
         add_library(Covek-samo-srcem-dobro-vidi SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(Covek-samo-srcem-dobro-vidi
             ${PROJECT_SOURCES}
@@ -45,9 +58,9 @@ endif()
 
 target_link_libraries(Covek-samo-srcem-dobro-vidi PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
+target_include_directories(${PROJECT_NAME} PRIVATE ${EXIFTOOL_DIR}/inc)
+
+
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.Covek-samo-srcem-dobro-vidi)
 endif()

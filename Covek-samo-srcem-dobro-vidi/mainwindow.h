@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QWidget>
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,7 +22,17 @@ public:
 public slots:
     void uploadImage();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
+<<<<<<< HEAD
+=======
+    QString m_fName;
+    imageFormat m_format;
+    std::vector<QWidget*> openedWindows;
+
+>>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)
 };
 #endif // MAINWINDOW_H
