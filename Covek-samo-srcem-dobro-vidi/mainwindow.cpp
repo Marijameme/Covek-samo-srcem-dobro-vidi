@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QTableWidget>
 #include <QString>
+#include <QCloseEvent>
 
 #include "metadata.h"
 #include "ImageFormats.h"
@@ -20,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pbUploadImage, &QPushButton::clicked, this, &MainWindow::uploadImage);
     connect(ui->pbExif, &QPushButton::clicked, this, &MainWindow::print_metadata);
+
 }
 
 MainWindow::~MainWindow()
@@ -33,9 +35,9 @@ void MainWindow::uploadImage()
         ui->imgView->scene()->clear();
 
     this->m_fName = QFileDialog::getOpenFileName(this, tr("Open Image"), "/home", tr("Image Files (*.png *.jpg *.bmp)"));
-    QFileInfo f(this->m_fName);
-    QString ext = f.suffix();
-    auto it = toImageFormat.find(ext.toStdString());
+    const std::string format = Metadata::get_image_format(this->m_fName);
+    std::cout << format << std::endl;
+    auto it = toImageFormat.find(format);
     if (it != toImageFormat.end()) {
         this->m_format = it->second;
     } else {
@@ -59,22 +61,27 @@ void MainWindow::uploadImage()
 
 void MainWindow::print_metadata()
 {
-    if(exifCompatible.find(this->m_format) == exifCompatible.end()){
-        std::cout << "Format nije podrzan\n";
-        QMessageBox *formatNotComaptible = new QMessageBox(this);
-        formatNotComaptible->setText("Image fomat doesn't support metadata extracion");
-        formatNotComaptible->show();
-        return;
-    }
+    // if(exifCompatible.find(this->m_format) == exifCompatible.end()){
+    //     std::cout << toStdString.find(this->m_format)->second << std::endl;
+    //     std::cout << "Format nije podrzan\n";
+    //     QMessageBox *formatNotComaptible = new QMessageBox(this);
+    //     formatNotComaptible->setWindowTitle("Format not supported");
+    //     formatNotComaptible->setText("Image fomat doesn't support metadata extracion");
+    //     formatNotComaptible->show();
+    //     return;
+    // }
     auto f = Metadata::read_data(this->m_fName);
 
     QWidget *metadataWindow = new QWidget();
+    this->openedWindows.emplace_back(metadataWindow);
     metadataWindow->setWindowTitle("Image metadata");
-    metadataWindow->setFixedSize(250, 1200);
+    metadataWindow->setFixedSize(400, 800);
 
     QTableWidget *metadataTable = new QTableWidget(metadataWindow);
-    metadataTable->setMinimumSize(250,1200) ;
+    metadataTable->setMinimumSize(400,800) ;
     metadataTable->setColumnCount(2);
+    metadataTable->setColumnWidth(0, 200);
+    metadataTable->setColumnWidth(1, 200);
     int numRows = f.size();
     metadataTable->setRowCount(numRows);
     QStringList headers = {"Feature Name", "Feature Value"};
@@ -87,8 +94,14 @@ void MainWindow::print_metadata()
         QTableWidgetItem *fetureValue = new QTableWidgetItem(QString::fromStdString(md.second));
         metadataTable->setItem(rowCount, 1, fetureValue);
         rowCount ++;
-        std::cout << md.first << " " << md.second << std::endl;
+        // std::cout << md.first << " " << md.second << std::endl;
     }
     metadataWindow->show();
-    std::cout << "Table out\n";
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    for(auto w : this->openedWindows)
+        w->close();
+    event->accept();
 }

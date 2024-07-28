@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QWidget>
+#include <vector>
 
 #include "ImageFormats.h"
 
@@ -23,9 +25,14 @@ public slots:
     void uploadImage();
     void print_metadata();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
     QString m_fName;
     imageFormat m_format;
+    std::vector<QWidget*> openedWindows;
+
 };
 #endif // MAINWINDOW_H
