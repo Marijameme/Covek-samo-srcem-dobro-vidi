@@ -11,6 +11,7 @@
 
 #include "metadata.h"
 #include "ImageFormats.h"
+#include "colorfilter.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,9 +19,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setFixedSize(800, 600);
+    ui->wHidden->hide();
 
     connect(ui->pbUploadImage, &QPushButton::clicked, this, &MainWindow::uploadImage);
     connect(ui->pbExif, &QPushButton::clicked, this, &MainWindow::print_metadata);
+    connect(ui->pbShowLayer, &QPushButton::clicked, this, &MainWindow::exposeLayer);
 
 }
 
@@ -35,8 +38,10 @@ void MainWindow::uploadImage()
         ui->imgView->scene()->clear();
 
     this->m_fName = QFileDialog::getOpenFileName(this, tr("Open Image"), "/home", tr("Image Files (*.png *.jpg *.bmp)"));
+    if(this->m_fName.isEmpty())
+        return;
+
     const std::string format = Metadata::get_image_format(this->m_fName);
-    std::cout << format << std::endl;
     auto it = toImageFormat.find(format);
     if (it != toImageFormat.end()) {
         this->m_format = it->second;
@@ -44,44 +49,43 @@ void MainWindow::uploadImage()
         this->m_format = imageFormat::UNKNOWN;
     }
 
-    if(this->m_fName != nullptr){
-        QPixmap pMap(this->m_fName);
+    QPixmap pMap(this->m_fName);
 
-        if (! ui->imgView->scene()) {
-            qDebug() << "No Scene!";
+    if (! ui->imgView->scene()) {
+        qDebug() << "No Scene!";
 
-            QGraphicsScene *scene = new QGraphicsScene(this);
-            ui->imgView->setScene(scene);
-        }
-
-        ui->imgView->scene()->addPixmap(pMap);
-        std::cout << m_fName .toStdString()<< std::endl;
+        QGraphicsScene *scene = new QGraphicsScene(this);
+        ui->imgView->setScene(scene);
     }
+
+    ui->imgView->scene()->addPixmap(pMap);
+    std::cout << m_fName .toStdString()<< std::endl;
+
 }
 
 void MainWindow::print_metadata()
 {
-    // if(exifCompatible.find(this->m_format) == exifCompatible.end()){
-    //     std::cout << toStdString.find(this->m_format)->second << std::endl;
-    //     std::cout << "Format nije podrzan\n";
-    //     QMessageBox *formatNotComaptible = new QMessageBox(this);
-    //     formatNotComaptible->setWindowTitle("Format not supported");
-    //     formatNotComaptible->setText("Image fomat doesn't support metadata extracion");
-    //     formatNotComaptible->show();
-    //     return;
-    // }
+    if(this->m_fName.size() == 0){
+        MainWindow::showMessage(this, "Please sellect an image first");
+        return;
+    }
+
     auto f = Metadata::read_data(this->m_fName);
+    if(f.size() == 0){
+        MainWindow::showMessage(this, "No metadata was extracted");
+        return;
+    }
 
     QWidget *metadataWindow = new QWidget();
     this->openedWindows.emplace_back(metadataWindow);
     metadataWindow->setWindowTitle("Image metadata");
-    metadataWindow->setFixedSize(400, 800);
+    metadataWindow->setFixedSize(600, 800);
 
     QTableWidget *metadataTable = new QTableWidget(metadataWindow);
-    metadataTable->setMinimumSize(400,800) ;
+    metadataTable->setMinimumSize(600,800) ;
     metadataTable->setColumnCount(2);
     metadataTable->setColumnWidth(0, 200);
-    metadataTable->setColumnWidth(1, 200);
+    metadataTable->setColumnWidth(1, 400);
     int numRows = f.size();
     metadataTable->setRowCount(numRows);
     QStringList headers = {"Feature Name", "Feature Value"};
@@ -94,9 +98,30 @@ void MainWindow::print_metadata()
         QTableWidgetItem *fetureValue = new QTableWidgetItem(QString::fromStdString(md.second));
         metadataTable->setItem(rowCount, 1, fetureValue);
         rowCount ++;
-        // std::cout << md.first << " " << md.second << std::endl;
     }
     metadataWindow->show();
+}
+
+void MainWindow::exposeLayer()
+{
+    if(this->m_fName.size() == 0){
+        MainWindow::showMessage(this, "Please sellect an image first");
+        return;
+    }
+    ColorFilter::Layer layer = ColorFilter::toLayer(ui->cbColor->currentText());
+    auto cf = new ColorFilter(this->m_fName, layer);
+    std::vector<QImage> images = cf->getImages();
+
+    ui->wHidden->setVisible(true);
+    QPixmap pMap(QPixmap::fromImage(images[0]));
+
+    if(!ui->imgView->scene()){
+        qDebug() << "No Scene!";
+
+        QGraphicsScene *scene = new QGraphicsScene(this);
+        ui->imgView->setScene(scene);
+    }
+    ui->imgView->scene()->addPixmap(pMap);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -104,4 +129,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
     for(auto w : this->openedWindows)
         w->close();
     event->accept();
+}
+
+void MainWindow::showMessage(QWidget *parent, QString message)
+{
+    QMessageBox *noData = new QMessageBox(parent);
+    noData->setText(message);
+    noData->show();
 }

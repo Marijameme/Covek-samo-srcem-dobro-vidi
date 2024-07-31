@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>595</height>
+    <width>805</width>
+    <height>608</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Covek samo srcem dobro vidi</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(10, 17, 26);</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="horizontalLayoutWidget">
@@ -83,6 +86,13 @@
         </layout>
        </item>
        <item>
+        <widget class="QPushButton" name="pbShowLayer">
+         <property name="text">
+          <string>show layer</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pbExif">
          <property name="text">
           <string>exif</string>
@@ -118,6 +128,63 @@
         <widget class="QGraphicsView" name="imgView"/>
        </item>
        <item>
+        <widget class="QWidget" name="wHidden" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <widget class="QWidget" name="">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>549</width>
+            <height>37</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="hidden">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item alignment="Qt::AlignLeft">
+            <widget class="QPushButton" name="pbPrevious">
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+            </widget>
+           </item>
+           <item alignment="Qt::AlignRight">
+            <widget class="QPushButton" name="pbNext">
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pbUploadImage">
          <property name="text">
           <string>upload image</string>
@@ -134,7 +201,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>801</width>
+     <width>805</width>
      <height>22</height>
     </rect>
    </property>

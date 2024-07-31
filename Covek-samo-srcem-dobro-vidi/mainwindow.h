@@ -24,6 +24,7 @@ public:
 public slots:
     void uploadImage();
     void print_metadata();
+    void exposeLayer();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -33,6 +34,7 @@ private:
     QString m_fName;
     imageFormat m_format;
     std::vector<QWidget*> openedWindows;
+    void showMessage(QWidget *parent, QString message);
 
 };
 #endif // MAINWINDOW_H

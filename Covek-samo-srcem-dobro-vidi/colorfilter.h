@@ -1,10 +1,32 @@
 #ifndef COLORFILTER_H
 #define COLORFILTER_H
 
+#include <QString>
+#include <QImage>
+#include <vector>
+#include "opencv2/core.hpp"
+
 class ColorFilter
 {
 public:
-    ColorFilter();
+    std::vector<cv::Mat> images;
+    enum class Layer {
+        RED,
+        GREEN,
+        BLUE,
+        SUPER,
+        UNDEFINED
+    };
+    ColorFilter(QString &fName, ColorFilter::Layer layer);
+    std::vector<QImage> getImages();
+    static ColorFilter::Layer toLayer(const QString &layer);
+
+private:
+    QString m_fName;
+    Layer m_layer;
+    std::vector<cv::Mat> superImage(const cv::Mat &image);
+    std::vector<cv::Mat> colorImage(const cv::Mat &image, const Layer color);
+    QImage cvMatToQImage(const cv::Mat &image);
 };
 
 #endif // COLORFILTER_H
