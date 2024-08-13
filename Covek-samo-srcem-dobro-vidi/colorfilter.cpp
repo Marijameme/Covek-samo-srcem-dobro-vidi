@@ -9,6 +9,7 @@
 
 #include "opencv2/core.hpp"
 #include "opencv2/imgcodecs.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
 
 ColorFilter::ColorFilter(QString &fName, ColorFilter::Layer layer):
     m_fName{fName}, m_layer{layer}
@@ -22,13 +23,21 @@ std::vector<QImage> ColorFilter::getImages()
     std::vector<cv::Mat> newImages;
     if(this->m_layer == ColorFilter::Layer::SUPER)
         newImages = this->superImage(image);
-    // else if(this->m_layer == ColorFilter::Layer::RED)
-    //     newImages = this->superImage()
+    else if(this->m_layer == ColorFilter::Layer::RED)
+        newImages = this->oneLayerImage(image, 2);
+    else if(this->m_layer == ColorFilter::Layer::GREEN)
+        newImages = this->oneLayerImage(image, 1);
+    else if(this->m_layer == ColorFilter::Layer::BLUE)
+        newImages = this->oneLayerImage(image, 0);
 
     std::vector<QImage> result;
     for(auto &im : newImages)
         result.push_back(this->cvMatToQImage(im));
-
+    std::stringstream ss("");
+    ss << time(NULL);
+    ss << ".jpg";
+    result[0].save(QString::fromStdString(ss.str()));
+    std::cerr << "getImages: " << ss.str() << std::endl;
     return result;
 }
 
@@ -69,18 +78,56 @@ std::vector<cv::Mat> ColorFilter::superImage(const cv::Mat &image)
     return alteredImages;
 }
 
+std::vector<cv::Mat> ColorFilter::oneLayerImage(const cv::Mat &image, int layerLevel)
+{
+    std::vector<cv::Mat> alteredImages;
+    std::vector<cv::Mat> channels;
+    cv::split(image, channels);
+    cv::Mat tmp;
+
+    for(int i = 0; i < 4; i++){
+        tmp = channels[layerLevel].clone();
+        std::stringstream ss("tmp");
+        ss << i;
+        ss << ".jpg";
+        for(int n = 0; n < tmp.rows; n++)
+        {
+            uchar *row = tmp.ptr<uchar>(n);
+            for(int m = 0; m < tmp.cols; m++){
+                uchar &pixel = row[m];
+                // pixel[i] is uchar to represent values between 0 and 255
+                row[m] = (uchar)(((((int)pixel) >> i) & 1)*255);
+
+            }
+        }
+        alteredImages.push_back(tmp.clone());
+        // cv::imwrite(ss.str(), tmp);
+    }
+    // std::cerr << alteredImages.size() << std::endl;
+    return alteredImages;
+}
+
 QImage ColorFilter::cvMatToQImage(const cv::Mat &image)
 {
+    if(!image.isContinuous()) {
+        qDebug() << "Mat is not continuous";
+        return QImage();
+    }
+
+    QImage res;
     if (image.type() == CV_8UC1) {
         // Grayscale image
-        return QImage(image.data, image.cols, image.rows, image.step, QImage::Format_Grayscale8);
+        res =  QImage(image.data, image.cols, image.rows, image.step, QImage::Format_Grayscale8);
     } else if (image.type() == CV_8UC3) {
         // 3-channel color image (BGR format)
         // cv stores images in BGR format, but QImage expects RGB, that's why it it swapped
-        return QImage(image.data, image.cols, image.rows, image.step, QImage::Format_RGB888).rgbSwapped();
+        res =  QImage(image.data, image.cols, image.rows, image.step, QImage::Format_RGB888).rgbSwapped();
     } else {
         qDebug() << "Unsupported cv::Mat format for QImage conversion";
         return QImage();
     }
-    // return QImage(image.data, image.cols, image.rows, QImage::Format_RGB888).rgbSwapped();
+    if(res.isNull())
+        qDebug() << "image was not created";
+
+    return res;
 }

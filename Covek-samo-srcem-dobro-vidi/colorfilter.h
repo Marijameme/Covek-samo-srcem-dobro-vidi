@@ -25,6 +25,7 @@ private:
     QString m_fName;
     Layer m_layer;
     std::vector<cv::Mat> superImage(const cv::Mat &image);
+    std::vector<cv::Mat> oneLayerImage(const cv::Mat &image, int layerLevel);
     std::vector<cv::Mat> colorImage(const cv::Mat &image, const Layer color);
     QImage cvMatToQImage(const cv::Mat &image);
 };

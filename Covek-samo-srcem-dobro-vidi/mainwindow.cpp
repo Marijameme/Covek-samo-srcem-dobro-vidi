@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pbUploadImage, &QPushButton::clicked, this, &MainWindow::uploadImage);
     connect(ui->pbExif, &QPushButton::clicked, this, &MainWindow::print_metadata);
     connect(ui->pbShowLayer, &QPushButton::clicked, this, &MainWindow::exposeLayer);
+    connect(ui->pbNext, &QPushButton::clicked, this, &MainWindow::nextImage);
+    connect(ui->pbPrevious, &QPushButton::clicked, this, &MainWindow::previousImage);
 
 }
 
@@ -59,20 +61,20 @@ void MainWindow::uploadImage()
     }
 
     ui->imgView->scene()->addPixmap(pMap);
-    std::cout << m_fName .toStdString()<< std::endl;
+    // std::cout << m_fName .toStdString()<< std::endl;
 
 }
 
 void MainWindow::print_metadata()
 {
     if(this->m_fName.size() == 0){
-        MainWindow::showMessage(this, "Please sellect an image first");
+        MainWindow::showMessage(*this, "Please sellect an image first");
         return;
     }
 
     auto f = Metadata::read_data(this->m_fName);
     if(f.size() == 0){
-        MainWindow::showMessage(this, "No metadata was extracted");
+        MainWindow::showMessage(*this, "No metadata was extracted");
         return;
     }
 
@@ -105,15 +107,67 @@ void MainWindow::print_metadata()
 void MainWindow::exposeLayer()
 {
     if(this->m_fName.size() == 0){
-        MainWindow::showMessage(this, "Please sellect an image first");
+        MainWindow::showMessage(*this, "Please sellect an image first");
         return;
     }
+
+    // if(!this->layerImages.empty())
+
     ColorFilter::Layer layer = ColorFilter::toLayer(ui->cbColor->currentText());
     auto cf = new ColorFilter(this->m_fName, layer);
-    std::vector<QImage> images = cf->getImages();
+    this->layerImages = cf->getImages();
 
     ui->wHidden->setVisible(true);
-    QPixmap pMap(QPixmap::fromImage(images[0]));
+    if(this->layerImages[0].isNull())
+        qDebug() << "no imagese";
+    else
+        std::cout << "Images are okay" << std::endl;
+
+    std::stringstream ss("");
+    ss << time(NULL);
+    ss << ".jpg";
+    this->layerImages[0].save(QString::fromStdString(ss.str()));
+    std::cerr << "main: " << ss.str() << std::endl;
+    this->showImage(this->layerImages[0]);
+}
+
+void MainWindow::nextImage()
+{
+    if(this->layerImages.empty()){
+        MainWindow::showMessage(*this, "No images to show");
+        return;
+    }
+
+    this->currImage++;
+    this->currImage = this->currImage % 8;
+    this->showImage(this->layerImages[this->currImage]);
+}
+
+void MainWindow::previousImage()
+{
+    if(this->layerImages.empty()){
+        MainWindow::showMessage(*this, "No images to show");
+        return;
+    }
+
+    this->currImage--;
+    if(this->currImage < 0)
+        this->currImage += 8;
+    this->currImage = this->currImage % 8;
+    this->showImage(this->layerImages[this->currImage]);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    for(auto w : this->openedWindows)
+        w->close();
+    event->accept();
+}
+
+void MainWindow::showImage(QImage &image)
+{
+
+    QPixmap pMap(QPixmap::fromImage(image));
 
     if(!ui->imgView->scene()){
         qDebug() << "No Scene!";
@@ -124,16 +178,10 @@ void MainWindow::exposeLayer()
     ui->imgView->scene()->addPixmap(pMap);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::showMessage(QWidget &parent, QString message)
 {
-    for(auto w : this->openedWindows)
-        w->close();
-    event->accept();
-}
-
-void MainWindow::showMessage(QWidget *parent, QString message)
-{
-    QMessageBox *noData = new QMessageBox(parent);
-    noData->setText(message);
-    noData->show();
+    QMessageBox::information(&parent, "", message);
+    // QMessageBox *noData = new QMessageBox(parent);
+    // noData->setText(message);
+    // noData->show();
 }

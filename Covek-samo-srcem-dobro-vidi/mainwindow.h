@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QWidget>
+#include <QImage>
 #include <vector>
 
 #include "ImageFormats.h"
@@ -25,6 +26,8 @@ public slots:
     void uploadImage();
     void print_metadata();
     void exposeLayer();
+    void nextImage();
+    void previousImage();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -34,7 +37,10 @@ private:
     QString m_fName;
     imageFormat m_format;
     std::vector<QWidget*> openedWindows;
-    void showMessage(QWidget *parent, QString message);
+    std::vector<QImage> layerImages;
+    int currImage;
+    void showImage(QImage &image);
+    void showMessage(QWidget &parent, QString message);
 
 };
 #endif // MAINWINDOW_H
