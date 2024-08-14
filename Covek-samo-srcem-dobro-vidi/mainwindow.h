@@ -5,6 +5,8 @@
 #include <QWidget>
 #include <vector>
 
+#include "ImageFormats.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -21,18 +23,16 @@ public:
 
 public slots:
     void uploadImage();
+    void print_metadata();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
-<<<<<<< HEAD
-=======
     QString m_fName;
     imageFormat m_format;
     std::vector<QWidget*> openedWindows;
 
->>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)
 };
 #endif // MAINWINDOW_H

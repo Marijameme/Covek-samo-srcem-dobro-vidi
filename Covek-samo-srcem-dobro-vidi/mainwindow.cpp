@@ -2,17 +2,15 @@
 #include "./ui_mainwindow.h"
 
 #include <iostream>
-<<<<<<< HEAD
-=======
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QWidget>
 #include <QTableWidget>
 #include <QString>
 #include <QCloseEvent>
->>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)
 
-#include <QFileDialog>
+#include "metadata.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -21,11 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->pbUploadImage, &QPushButton::clicked, this, &MainWindow::uploadImage);
-<<<<<<< HEAD
-=======
     connect(ui->pbExif, &QPushButton::clicked, this, &MainWindow::print_metadata);
 
->>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)
 }
 
 MainWindow::~MainWindow()
@@ -38,11 +33,6 @@ void MainWindow::uploadImage()
     if(ui->imgView->scene())
         ui->imgView->scene()->clear();
 
-<<<<<<< HEAD
-    QString fName = QFileDialog::getOpenFileName(this, tr("Open Image"), "/home", tr("Image Files (*.png *.jpg *.bmp)"));
-    if(fName != nullptr){
-        QPixmap pMap(fName);
-=======
     this->m_fName = QFileDialog::getOpenFileName(this, tr("Open Image"), "/home", tr("Image Files (*.png *.jpg *.bmp)"));
     const std::string format = Metadata::get_image_format(this->m_fName);
     std::cout << format << std::endl;
@@ -55,7 +45,6 @@ void MainWindow::uploadImage()
 
     if(this->m_fName != nullptr){
         QPixmap pMap(this->m_fName);
->>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)
 
         if (! ui->imgView->scene()) {
             qDebug() << "No Scene!";
@@ -65,11 +54,9 @@ void MainWindow::uploadImage()
         }
 
         ui->imgView->scene()->addPixmap(pMap);
-        std::cout << fName .toStdString()<< std::endl;
+        std::cout << this->m_fName .toStdString()<< std::endl;
     }
 }
-<<<<<<< HEAD
-=======
 
 void MainWindow::print_metadata()
 {
@@ -117,4 +104,3 @@ void MainWindow::closeEvent(QCloseEvent *event)
         w->close();
     event->accept();
 }
->>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)

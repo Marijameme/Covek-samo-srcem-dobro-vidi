@@ -8,13 +8,12 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -Wall -Wextra")
 
 # ZA QT PAKETE
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-<<<<<<< HEAD
-=======
 # ZA OPENCV BIBLIOTEKU
 find_package(OpenCV REQUIRED)
 message(STATUS "Include dirs: ${OpenCV_INCLUDE_DIRS}")
@@ -27,7 +26,6 @@ message(STATUS "Include dirs: ${Exiv2_INCLUDE_DIRS}")
 set(EXIFTOOL_DIR "/home/marijana/Downloads/cpp_exiftool")
 include_directories(${EXIFTOOL_DIR}/inc)
 
->>>>>>> 6e3e0c1 (feat: add metadata extraction using ExifTool)
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
@@ -43,6 +41,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         colorfilter.h colorfilter.cpp
+        metadata.h metadata.cpp
+        ImageFormats.h
+
     )
 else()
     if(ANDROID)
@@ -57,6 +58,8 @@ else()
 endif()
 
 target_link_libraries(Covek-samo-srcem-dobro-vidi PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC exiv2::exiv2)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${EXIFTOOL_DIR}/inc)
 
