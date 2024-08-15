@@ -111,23 +111,11 @@ void MainWindow::exposeLayer()
         return;
     }
 
-    // if(!this->layerImages.empty())
-
     ColorFilter::Layer layer = ColorFilter::toLayer(ui->cbColor->currentText());
     auto cf = new ColorFilter(this->m_fName, layer);
     this->layerImages = cf->getImages();
 
     ui->wHidden->setVisible(true);
-    if(this->layerImages[0].isNull())
-        qDebug() << "no imagese";
-    else
-        std::cout << "Images are okay" << std::endl;
-
-    std::stringstream ss("");
-    ss << time(NULL);
-    ss << ".jpg";
-    this->layerImages[0].save(QString::fromStdString(ss.str()));
-    std::cerr << "main: " << ss.str() << std::endl;
     this->showImage(this->layerImages[0]);
 }
 

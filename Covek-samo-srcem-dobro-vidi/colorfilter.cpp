@@ -33,11 +33,7 @@ std::vector<QImage> ColorFilter::getImages()
     std::vector<QImage> result;
     for(auto &im : newImages)
         result.push_back(this->cvMatToQImage(im));
-    std::stringstream ss("");
-    ss << time(NULL);
-    ss << ".jpg";
-    result[0].save(QString::fromStdString(ss.str()));
-    std::cerr << "getImages: " << ss.str() << std::endl;
+
     return result;
 }
 
@@ -73,7 +69,7 @@ std::vector<cv::Mat> ColorFilter::superImage(const cv::Mat &image)
                 tmp.ptr<cv::Vec3b>(n)[m][2] = (uchar)(((((int)pixel[2]) >> i) & 1)*255);
             }
         }
-        alteredImages.push_back(tmp);
+        alteredImages.push_back(tmp.clone());
     }
     return alteredImages;
 }
@@ -85,11 +81,8 @@ std::vector<cv::Mat> ColorFilter::oneLayerImage(const cv::Mat &image, int layerL
     cv::split(image, channels);
     cv::Mat tmp;
 
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < 8; i++){
         tmp = channels[layerLevel].clone();
-        std::stringstream ss("tmp");
-        ss << i;
-        ss << ".jpg";
         for(int n = 0; n < tmp.rows; n++)
         {
             uchar *row = tmp.ptr<uchar>(n);
@@ -101,33 +94,37 @@ std::vector<cv::Mat> ColorFilter::oneLayerImage(const cv::Mat &image, int layerL
             }
         }
         alteredImages.push_back(tmp.clone());
-        // cv::imwrite(ss.str(), tmp);
     }
-    // std::cerr << alteredImages.size() << std::endl;
+
     return alteredImages;
 }
 
-QImage ColorFilter::cvMatToQImage(const cv::Mat &image)
+QImage ColorFilter::cvMatToQImage( cv::Mat &image)
 {
     if(!image.isContinuous()) {
         qDebug() << "Mat is not continuous";
         return QImage();
     }
 
+    int chanells = image.channels();
     QImage res;
-    if (image.type() == CV_8UC1) {
-        // Grayscale image
-        res =  QImage(image.data, image.cols, image.rows, image.step, QImage::Format_Grayscale8);
-    } else if (image.type() == CV_8UC3) {
-        // 3-channel color image (BGR format)
-        // cv stores images in BGR format, but QImage expects RGB, that's why it it swapped
-        res =  QImage(image.data, image.cols, image.rows, image.step, QImage::Format_RGB888).rgbSwapped();
-    } else {
-        qDebug() << "Unsupported cv::Mat format for QImage conversion";
+    if(1 == chanells)
+        res = QImage(image.cols, image.rows, QImage::Format_Grayscale8);
+    else if(3 == chanells)
+        res = QImage(image.cols, image.rows, QImage::Format_RGB888);
+    else
         return QImage();
+
+    uchar *sptr,*dptr;
+    int linesize = image.cols*chanells;
+    for(int y = 0; y < image.rows; y++){
+        sptr = image.ptr(y);
+        dptr = res.scanLine(y);
+        memcpy(dptr,sptr,linesize);
     }
-    if(res.isNull())
-        qDebug() << "image was not created";
+
+    if(3 == chanells)
+        res = res.rgbSwapped();
 
     return res;
 }

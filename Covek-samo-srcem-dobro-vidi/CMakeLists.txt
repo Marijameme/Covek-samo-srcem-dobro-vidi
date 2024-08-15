@@ -16,6 +16,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 # ZA OPENCV BIBLIOTEKU
 find_package(OpenCV REQUIRED)
+include_directories( ${OpenCV_INCLUDE_DIRS} )
 message(STATUS "Include dirs: ${OpenCV_INCLUDE_DIRS}")
 
 # ZA EXIV2 BIBLIOTEKU
