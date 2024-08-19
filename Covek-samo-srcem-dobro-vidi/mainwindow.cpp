@@ -106,10 +106,11 @@ void MainWindow::print_metadata()
 
 void MainWindow::exposeLayer()
 {
-    if(this->m_fName.size() == 0){
+    if(this->m_fName.isEmpty()){
         MainWindow::showMessage(*this, "Please sellect an image first");
         return;
     }
+    this->currImage = 0;
 
     ColorFilter::Layer layer = ColorFilter::toLayer(ui->cbColor->currentText());
     auto cf = new ColorFilter(this->m_fName, layer);
@@ -169,7 +170,5 @@ void MainWindow::showImage(QImage &image)
 void MainWindow::showMessage(QWidget &parent, QString message)
 {
     QMessageBox::information(&parent, "", message);
-    // QMessageBox *noData = new QMessageBox(parent);
-    // noData->setText(message);
-    // noData->show();
+
 }
