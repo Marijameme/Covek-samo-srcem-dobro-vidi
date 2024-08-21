@@ -16,7 +16,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 # ZA OPENCV BIBLIOTEKU
 find_package(OpenCV REQUIRED)
-message(STATUS "Include dirs: ${OpenCV_INCLUDE_DIRS}")
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+#message(STATUS "Include dirs: ${OpenCV_INCLUDE_DIRS}")
 
 # ZA EXIV2 BIBLIOTEKU
 find_package(exiv2 REQUIRED)
@@ -59,6 +60,7 @@ endif()
 
 target_link_libraries(Covek-samo-srcem-dobro-vidi PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS})
+message("Included ${OpenCV_LIBS}")
 target_link_libraries(${PROJECT_NAME} PUBLIC exiv2::exiv2)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${EXIFTOOL_DIR}/inc)

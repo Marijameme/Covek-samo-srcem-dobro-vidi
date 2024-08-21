@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QImage>
 #include <QMainWindow>
 #include <QWidget>
 #include <vector>
@@ -8,7 +9,8 @@
 #include "ImageFormats.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 QT_END_NAMESPACE
@@ -17,22 +19,24 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-public:
+  public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-public slots:
+  public slots:
     void uploadImage();
     void print_metadata();
+    void exposeLayer();
+    void nextImage();
+    void previousImage();
 
-protected:
-    void closeEvent(QCloseEvent *event) override;
-
-private:
+  private:
     Ui::MainWindow *ui;
     QString m_fName;
     imageFormat m_format;
-    std::vector<QWidget*> openedWindows;
-
+    std::vector<QImage> layerImages;
+    int currImage;
+    void showImage(QImage &image);
+    void showMessage(QWidget &parent, QString message);
 };
 #endif // MAINWINDOW_H
