@@ -14,7 +14,8 @@
    <string>Covek samo srcem dobro vidi</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(10, 17, 26);</string>
+   <string notr="true">background-color: rgb(10, 17, 26);
+color:rgb(57,255,20)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="horizontalLayoutWidget">

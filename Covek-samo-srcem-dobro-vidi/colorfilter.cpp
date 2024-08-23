@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QString>
 #include <QWidget>
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
@@ -30,9 +31,8 @@ std::vector<QImage> ColorFilter::getImages()
     else if (this->m_layer == ColorFilter::Layer::BLUE)
         newImages = this->oneLayerImage(image, 0);
 
-    std::vector<QImage> result;
-    for (auto &im : newImages)
-        result.push_back(this->cvMatToQImage(im));
+    std::vector<QImage> result(newImages.size());
+    std::transform(newImages.begin(), newImages.end(), result.begin(), ColorFilter::cvMatToQImage);
 
     return result;
 }
@@ -117,17 +117,17 @@ QImage ColorFilter::cvMatToQImage(cv::Mat &image)
     else
         return QImage();
 
-    uchar *sptr, *dptr;
     int linesize = image.cols * chanells;
     for (int y = 0; y < image.rows; y++)
     {
+        uchar *sptr, *dptr;
         sptr = image.ptr(y);
         dptr = res.scanLine(y);
         memcpy(dptr, sptr, linesize);
     }
 
     if (3 == chanells)
-        res.rgbSwap();
+        res = res.rgbSwapped();
 
     return res;
 }
