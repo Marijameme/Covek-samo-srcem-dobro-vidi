@@ -24,7 +24,7 @@ find_package(exiv2 REQUIRED)
 message(STATUS "Include dirs: ${Exiv2_INCLUDE_DIRS}")
 
 # ZA EXIFTOOL INTERFACE
-set(EXIFTOOL_DIR "/home/marijana/Downloads/cpp_exiftool")
+set(EXIFTOOL_DIR "${CMAKE_SOURCE_DIR}/cpp_exiftool")
 include_directories(${EXIFTOOL_DIR}/inc)
 
 set(PROJECT_SOURCES
