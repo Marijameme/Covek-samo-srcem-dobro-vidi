@@ -1,0 +1,33 @@
+# Convenience wrapper around the Dockerfile.
+#
+#   docker compose run --rm verify     # build + run the verification suite
+#   docker compose run --rm stegcli /work/some.png   # analyse a file from ./ (mounted at /work)
+#   docker compose run --rm gui        # launch the Qt GUI on an X11 host (see below)
+#
+# GUI needs an X server on the host. On Linux, first allow local connections:
+#   xhost +local:docker
+
+services:
+  verify:
+    build: .
+    image: covek-steg:latest
+    command: ["bash", "tests/verify.sh", "/app/build"]
+
+  stegcli:
+    build: .
+    image: covek-steg:latest
+    entrypoint: ["/app/build/tools/stegcli"]
+    volumes:
+      - ./:/work:ro
+
+  gui:
+    build: .
+    image: covek-steg:latest
+    command: ["/app/build/gui/Covek-samo-srcem-dobro-vidi"]
+    environment:
+      DISPLAY: "${DISPLAY:-:0}"
+      QT_X11_NO_MITSHM: "1"
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./:/work:ro
+    network_mode: host

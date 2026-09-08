@@ -78,3 +78,5 @@ debug*
 
 CMakeLists.txt.user
 CMakeUrer*
+CMakeUserPresets.json
+/build/

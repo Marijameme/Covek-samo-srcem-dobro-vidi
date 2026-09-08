@@ -1,29 +1,35 @@
-FROM ubuntu:latest
+# Build + verification image for "Covek samo srcem dobro vidi".
+#
+#   docker build -t covek-steg .
+#   docker run --rm covek-steg                 # runs the verification suite
+#   docker run --rm -it covek-steg bash        # poke around
+#
+# Everything needed to compile and check the project is installed from the Ubuntu
+# archive: no source builds, no extra package manager.
 
-COPY . /usr/program
-WORKDIR /usr/program
+FROM ubuntu:24.04
 
-RUN apt -y update && apt -y upgrade && \
-    apt install -y wget unzip build-essential cmake \
-    git libgtk2.0-dev pkg-config libavcodec-dev \
-    libavformat-dev libswscale-dev python3 python3-pip \
-    qt6-base-dev qt6-multimedia-dev
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN pip3 install conan --break-system-packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        ninja-build \
+        pkg-config \
+        ca-certificates \
+        python3 \
+        qt6-base-dev \
+        qt6-base-dev-tools \
+        libgl1-mesa-dev \
+        libopencv-dev \
+        libexiv2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip && \
-    unzip opencv.zip && \
-    rm -r opencv.zip && \
-    mv opencv-4.x opencv 
-    
-RUN mkdir -p opencv/build && \
-    cd opencv/build && \
-    cmake .. && \
-    make -j$(nproc) && \
-    make install
+WORKDIR /app
+COPY . .
 
-RUN conan profile detect --force
+RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build build
 
-RUN ./release.sh
-
-CMD ["./release/Covek-samo-srcem-dobro-vidi"]
+# Default command: build smoke test + analyzer assertions.
+CMD ["bash", "tests/verify.sh", "/app/build"]
